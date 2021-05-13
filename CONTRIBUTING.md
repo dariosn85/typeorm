@@ -53,7 +53,7 @@ maybe an issue for your problem already exists and the discussion might inform y
 We want to fix all the issues as soon as possible, but before fixing a bug we need to reproduce and confirm it.
  In order to reproduce bugs we ask you to provide a minimal code snippet that shows a reproduction of the problem.
 
-You can file new issues by filling out our [new issue form](https://github.com/typeorm/typeorm/issues/new).
+You can file new issues by filling out our [new issue form](https://github.com/typeorm/typeorm/issues/new/choose).
 
 ### <a name="submit-pr"></a> Submitting a Pull Request (PR)
 Before you submit your Pull Request (PR) consider the following guidelines:
