@@ -164,6 +164,15 @@ export class SelectQueryBuilder<Entity> extends QueryBuilder<Entity> implements 
     }
 
     /**
+     * Set max execution time.
+     * @param milliseconds
+     */
+    maxExecutionTime(milliseconds: number): this {
+        this.expressionMap.maxExecutionTime = milliseconds;
+        return this;
+    }
+
+    /**
      * Sets whether the selection is DISTINCT.
      */
     distinct(distinct: boolean = true): this {
@@ -1448,10 +1457,17 @@ export class SelectQueryBuilder<Entity> extends QueryBuilder<Entity> implements 
      * Creates select | select distinct part of SQL query.
      */
     protected createSelectDistinctExpression(): string {
-        const {selectDistinct, selectDistinctOn} = this.expressionMap;
+        const {selectDistinct, selectDistinctOn, maxExecutionTime} = this.expressionMap;
         const {driver} = this.connection;
 
         let select = "SELECT ";
+
+        if (maxExecutionTime > 0) {
+            if (driver instanceof MysqlDriver) {
+                select += `/*+ MAX_EXECUTION_TIME(${ this.expressionMap.maxExecutionTime }) */ `;
+            }
+        }
+
         if (driver instanceof PostgresDriver && selectDistinctOn.length > 0) {
             const selectDistinctOnMap = selectDistinctOn.map(
               (on) => this.replacePropertyNames(on)
@@ -2078,7 +2094,7 @@ export class SelectQueryBuilder<Entity> extends QueryBuilder<Entity> implements 
         let savedQueryResultCacheOptions: QueryResultCacheOptions|undefined = undefined;
         let cacheError = false;
         if (this.connection.queryResultCache && (this.expressionMap.cache || cacheOptions.alwaysEnabled)) {
-            try {            
+            try {
                 savedQueryResultCacheOptions = await this.connection.queryResultCache.getFromCache({
                     identifier: this.expressionMap.cacheId,
                     query: queryId,
@@ -2091,7 +2107,7 @@ export class SelectQueryBuilder<Entity> extends QueryBuilder<Entity> implements 
                     throw error;
                 }
                 cacheError = true;
-            }            
+            }
         }
 
         const results = await queryRunner.query(sql, parameters);
@@ -2109,7 +2125,7 @@ export class SelectQueryBuilder<Entity> extends QueryBuilder<Entity> implements 
                 if (!cacheOptions.ignoreErrors) {
                     throw error;
                 }
-            }            
+            }
         }
 
         return results;
